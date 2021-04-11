@@ -14,7 +14,7 @@
 using namespace std::chrono;
 
 const std::string separator_line{ "\n---------------------------------------\n" };
-const int count_of_nodes = 27;
+const int count_of_nodes = 26;
 struct Job;
 
 int main(int argc, char* argv[]) {
@@ -57,13 +57,6 @@ int main(int argc, char* argv[]) {
 	matrix[2] = generate_b_vector(n);
 
 	std::list<Job> work_flow{
-		// L1
-		Job{1, Job::operation::GEN_MATRIX, {n, n}}, // A
-		Job{3, Job::operation::GEN_MATRIX, {n, n}},	// A1
-		Job{4, Job::operation::GEN_MATRIX, {n, 1}},	// b1
-		Job{5, Job::operation::GEN_MATRIX, {n, 1}}, // c1
-		Job{6, Job::operation::GEN_MATRIX, {n, n}}, // A2
-		Job{7, Job::operation::GEN_MATRIX, {n, n}}, // B2
 		// L1.5
 		Job{9, Job::operation::PLUS_WITH_SCALAR, {4, 5}, {2.0, 3.0}},
 		Job{10, Job::operation::MINUS, {7, 8}},
@@ -72,26 +65,51 @@ int main(int argc, char* argv[]) {
 		Job{12, Job::operation::MULT, {3, 9}},	// y2
 		Job{13, Job::operation::MINUS, {6, 10}}, // Y3
 		// L3
-		Job{14, Job::operation::MULT_TRANSPOSE_MAT, {11, 13}}, // y1'Y3
+		Job{14, Job::operation::MULT_MAT_TRANSPOSE, {11, 11}}, // y1y1'
 		Job{15, Job::operation::MULT_MAT_TRANSPOSE, {12, 12}}, // y2y2'
 		Job{16, Job::operation::MULT, {13, 13}}, // Y3^2
 		Job{17, Job::operation::MULT_MAT_TRANSPOSE, {11, 12}}, //y1y2'
-		Job{18, Job::operation::MULT_TRANSPOSE_MAT, {12, 13}},
-		Job{19, Job::operation::MULT, {12, 11}},
+		Job{18, Job::operation::MULT, {13, 12}},
 		// L4
-		Job{20, Job::operation::MULT, {14, 11}},
-		Job{21, Job::operation::PLUS, {16, 17}},
-		Job{22, Job::operation::MULT, {18, 19}},
-		// L5
-		Job{23, Job::operation::MULT, {20, 15}},
-		Job{24, Job::operation::PLUS, {22, 11}},
-		Job{25, Job::operation::PLUS, {23, 21}},
+		Job{19, Job::operation::MULT, {14, 13}},
+		Job{20, Job::operation::PLUS, {16, 17}},
+		Job{21, Job::operation::MULT, {17, 18}},
+		//
+		Job{22, Job::operation::MULT, {19, 15}},
+		Job{23, Job::operation::PLUS, {21, 11}},
+		Job{24, Job::operation::PLUS, {22, 20}},
 		// Result
-		Job{26, Job::operation::MULT, {25, 24}}
+		Job{25, Job::operation::MULT, {24, 23}},
 	};
 
-	int id_result = work_flow.back().id;
+	if (proc_rank == 0) {
+		if (isRandGen) {
+			work_flow.push_front(Job{7, Job::operation::GEN_MATRIX, {n, n}}); // B2
+			work_flow.push_front(Job{6, Job::operation::GEN_MATRIX, {n, n}}); // A2
+			work_flow.push_front(Job{5, Job::operation::GEN_MATRIX, {n, 1}}); // c1
+			work_flow.push_front(Job{4, Job::operation::GEN_MATRIX, {n, 1}});	// b1
+			work_flow.push_front(Job{3, Job::operation::GEN_MATRIX, {n, n}});	// A1
+			work_flow.push_front(Job{1, Job::operation::GEN_MATRIX, {n, n}}); // A
+		}
+		else {
+			matrix[1].set_shape({n, n});
+			matrix[3].set_shape({n, n});
+			matrix[4].set_shape({n, 1});
+			matrix[5].set_shape({n, 1});
+			matrix[6].set_shape({n, n});
+			matrix[7].set_shape({n, n});
 
+			std::cin >> matrix[1]
+				>> matrix[3]
+				>> matrix[4]
+				>> matrix[5]
+				>> matrix[6]
+				>> matrix[7];
+			std::cout << "Manually set was saccessfull" << std::endl;
+		}
+	}
+
+	int id_result = work_flow.back().id;
 
 	// Start timer;
 	auto start = std::chrono::high_resolution_clock::now();
@@ -99,10 +117,10 @@ int main(int argc, char* argv[]) {
 	if (proc_rank == 0) { // main proc
 		// All matrix
 
-		std::cout << separator_line << "C2 = \n"
-			<< matrix[8];
-		std::cout << separator_line << "bi = \n"
-			<< matrix[2];
+		// std::cout << separator_line << "C2 = \n"
+		// 	<< matrix[8];
+		// std::cout << separator_line << "bi = \n"
+		// 	<< matrix[2];
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		Job end_job{ 999, Job::operation::END };
@@ -117,7 +135,7 @@ int main(int argc, char* argv[]) {
 
 				if (send_job.op == Job::operation::WAIT) {
 					std::cout << "No jobs, wait for res matrices" << std::endl;
-					sleep(3);
+					// sleep(3);
 					break;
 				}
 				// Send job to proc_rank

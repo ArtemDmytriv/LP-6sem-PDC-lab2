@@ -148,6 +148,16 @@ std::ostream& operator<<(std::ostream &os, const Matrix &op) {
         }
         os << '\n';
     }
+    return os;
+}
+
+std::istream& operator>>(std::istream &is, Matrix &op) {
+    for (int i = 0; i < op.get_row(); ++i) {
+        for (int j = 0; j < op.get_col(); ++j) {
+            is >> op.at(i, j);
+        }
+    }
+    return is;
 }
 
 Matrix M_plus_Mt(const Matrix &mat, const Matrix &transp) {

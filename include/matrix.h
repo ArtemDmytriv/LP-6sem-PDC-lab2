@@ -29,6 +29,7 @@ public:
     friend Matrix operator*(double num, const Matrix &op2);
 
     friend std::ostream& operator<<(std::ostream &os, const Matrix &op);
+    friend std::istream& operator>>(std::istream &is, Matrix &op);
 
     friend Matrix M_plus_Mt(const Matrix &mat, const Matrix &transp);
     friend Matrix Mt_plus_M(const Matrix &transp, const Matrix &mat);
