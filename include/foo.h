@@ -2,6 +2,7 @@
 #include <mpi.h>
 #include <string>
 #include <list>
+#include <map>
 
 class Matrix;
 
@@ -40,4 +41,6 @@ void send_matrix_to_proc(const Matrix &op1, int proc_rank);
 Matrix recv_mat_from_main(int proc_rank, int mat_id);
 
 void do_job(int proc_rank, Job job, Matrix *mat);
+
+void logoutput(std::ostream &os, Matrix *mat, int n, const std::map<int, std::string> &mat_map);
 

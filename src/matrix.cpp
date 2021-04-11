@@ -144,7 +144,7 @@ Matrix operator*(double num, const Matrix &op2) {
 std::ostream& operator<<(std::ostream &os, const Matrix &op) {
     for (int i = 0; i < op.row; ++i) {
         for (int j = 0; j < op.col; ++j) {
-            os << std::setw(10) << /* std::setprecision(2) <<  */ std::fixed << op.at(i, j);
+            os << /*  std::setw(10) << std::setprecision(2) <<  std::fixed << */ op.at(i, j) << ' ';
         }
         os << '\n';
     }

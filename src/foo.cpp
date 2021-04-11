@@ -122,3 +122,12 @@ void do_job(int proc_rank, Job job, Matrix *mat) {
 	MPI_Send(&shape.first, 2, MPI_INT, 0, job.id, MPI_COMM_WORLD);
 	MPI_Send(mat[job.id].data(), shape.first * shape.second, MPI_DOUBLE, 0, job.id, MPI_COMM_WORLD);
 }
+
+
+void logoutput(std::ostream &os, Matrix *mat, int n, const std::map<int, std::string> &mat_map) {
+	for (int i = 1; i < n; ++i) {
+		os << mat_map.at(i) << " =\n";
+		os << mat[i];
+		os << "--------------------------------------\n";
+	}
+}

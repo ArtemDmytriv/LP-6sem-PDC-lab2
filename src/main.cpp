@@ -6,7 +6,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <vector>
+#include <map>
 #include <algorithm>
 #include <utility>
 #include <chrono>
@@ -15,7 +15,11 @@ using namespace std::chrono;
 
 const std::string separator_line{ "\n---------------------------------------\n" };
 const int count_of_nodes = 26;
-struct Job;
+const std::map<int, std::string> matrix_map {{1, "A"}, {2, "bi"}, {3, "A1"}, {4, "b1"}, {5, "c1"}, {6, "A2"}, {7, "B2"}, {8, "Cij"},
+											 {9, "2b1 + 3c1"}, {10, "B2 - C2"}, {11, "y1"}, {12, "y2"}, {13, "Y3"},
+											 {14, "y1y1'"}, {15, "y2y2'"}, {16, "Y3^2"}, {17, "y1y2'"}, {18, "Y3y2"},
+											 {19, "y1y1'Y3"}, {20, "Y3^2 + y1y2'"}, {21, "y1y2'Y3y2"}, {22, "22"},
+											 {23, "23"}, {24, "24"}, {25, "24"}};
 
 int main(int argc, char* argv[]) {
 	int n;
@@ -36,7 +40,13 @@ int main(int argc, char* argv[]) {
 	MPI_Datatype job_type = get_Job_struct_mpi();
 
 	bool isRandGen = false;
+	bool isDebugLog = false;
 	if (proc_rank == 0) {
+		if (argc > 1) {
+			if (argv[1] == "-g") {
+				isDebugLog = true;
+			}
+		}
 		std::cout << "sizeof(" << sizeof(Matrix) << ")\n";
 		std::cout << "n = ";
 		std::cin >> n;
@@ -59,11 +69,11 @@ int main(int argc, char* argv[]) {
 	std::list<Job> work_flow{
 		// L1.5
 		Job{9, Job::operation::PLUS_WITH_SCALAR, {4, 5}, {2.0, 3.0}},
-		Job{10, Job::operation::MINUS, {7, 8}},
+		Job{10, Job::operation::MINUS, {7, 8}}, //
 		// L2
 		Job{11, Job::operation::MULT, {1, 2}},	// y1
 		Job{12, Job::operation::MULT, {3, 9}},	// y2
-		Job{13, Job::operation::MINUS, {6, 10}}, // Y3
+		Job{13, Job::operation::MULT, {6, 10}}, // Y3
 		// L3
 		Job{14, Job::operation::MULT_MAT_TRANSPOSE, {11, 11}}, // y1y1'
 		Job{15, Job::operation::MULT_MAT_TRANSPOSE, {12, 12}}, // y2y2'
@@ -84,6 +94,7 @@ int main(int argc, char* argv[]) {
 
 	if (proc_rank == 0) {
 		if (isRandGen) {
+			std::cout << "Add ranodm jobs for generate matrices" << std::endl;
 			work_flow.push_front(Job{7, Job::operation::GEN_MATRIX, {n, n}}); // B2
 			work_flow.push_front(Job{6, Job::operation::GEN_MATRIX, {n, n}}); // A2
 			work_flow.push_front(Job{5, Job::operation::GEN_MATRIX, {n, 1}}); // c1
@@ -212,13 +223,19 @@ int main(int argc, char* argv[]) {
 		auto duration = duration_cast<microseconds>(stop - start);
 
     	std::cout << "Time taken by program: " << duration.count() << " microseconds" << std::endl;
+		std::cout << "Output input matrices for result checker" << std::endl;
+		std::ofstream fout("matrices.txt", std::ios::trunc);
+		fout << n << '\n'
+			<< matrix[1] // A
+ 			<< matrix[3] // A1
+			<< matrix[4] // b1
+			<< matrix[5] // c1
+			<< matrix[6] // A2
+			<< matrix[7]; // B2
+		fout.close();
+		if (isDebugLog) logoutput(std::cout, matrix, count_of_nodes, matrix_map);
 
-		std::cout << "A1=\n" << matrix[3];
-		std::cout << "b1=\n" << matrix[4];
-		std::cout << "c1=\n" << matrix[5];
-		std::cout << "2b1 + 3c1=\n" << matrix[9];
-		std::cout << "y2 = A1(2b1 + 3c1)=\n" << matrix[12];
-		std::cout << "Res =" << matrix[id_result];
+		std::cout << "Result=\n" << std::ios::fixed << matrix[id_result];
 	}
 
 	MPI_Type_free(&job_type);
