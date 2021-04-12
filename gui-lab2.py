@@ -137,12 +137,16 @@ class PyMatrix(QMainWindow):
 
         res = []
         time_mpi = ""
+        time_one_thread = ""
         for i in range(len(out)):
-            if out[i].find(b"Time") >= 0:
-                time_mpi = out[i].decode("utf-8").split(":")[1]
+            if out[i].find(b"Time taken by program") >= 0:
+                time_mpi = out[i].decode("utf-8").split(":")[1].split(" ")[1]
             if out[i].find(b"Result") >= 0:
                 for k in range(1, self.mat.N + 1):
                     res.append(list(filter(lambda x: x != '', out[i+k].decode("utf-8").split(' '))))
+            if out[i].find(b"Time taken by one thread program") >= 0:
+                time_one_thread = out[i].decode("utf-8").split(":")[1].split(" ")[1]
+
         print("MPI result=")
         pprint(Matrix(res))
         print("Python recheck result=")
@@ -172,7 +176,7 @@ class PyMatrix(QMainWindow):
         py_res.resizeColumnsToContents()
 
         layout = QGridLayout(dlg)
-        layout.addWidget(QLabel("MPI Result " + time_mpi), 0, 0)
+        layout.addWidget(QLabel("MPI Result " + time_mpi + " : " + time_one_thread), 0, 0)
         layout.addWidget(QLabel("Python Result"), 0, 1)
         layout.addWidget(mpi_res, 1, 0)
         layout.addWidget(py_res, 1, 1)

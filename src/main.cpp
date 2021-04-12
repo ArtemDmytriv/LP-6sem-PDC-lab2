@@ -123,11 +123,6 @@ int main(int argc, char* argv[]) {
 
 	if (proc_rank == 0) { // main proc
 		// All matrix
-
-		// std::cout << separator_line << "C2 = \n"
-		// 	<< matrix[8];
-		// std::cout << separator_line << "bi = \n"
-		// 	<< matrix[2];
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		Job end_job{ 999, Job::operation::END };
@@ -237,5 +232,22 @@ int main(int argc, char* argv[]) {
 	MPI_Type_free(&job_type);
 	MPI_Barrier(MPI_COMM_WORLD);
 	MPI_Finalize();
+
+	if (proc_rank == 0) {
+		start = std::chrono::high_resolution_clock::now();
+
+		Matrix y1 = matrix[1] * matrix[2];
+		std::cout << y1;
+		Matrix y2 = matrix[3] * (2.0 * matrix[4] + 3.0 * matrix[5]);
+		std::cout << y2;
+		Matrix Y3 = matrix[6] * (matrix[7] - matrix[8]);
+		std::cout << Y3;
+
+		Matrix one_thread_mat = (y1*y1.get_transpose()*Y3*y2*y2.get_transpose() + Y3*Y3 + y1*y2.get_transpose())*(y1*y2.get_transpose()*Y3*y2 + y1);
+
+		auto stop = std::chrono::high_resolution_clock::now();
+		auto duration = duration_cast<microseconds>(stop - start);
+		std::cout << "Time taken by one thread program: "  << duration.count() << " microseconds" << std::endl;
+	}
 	return 0;
 }
