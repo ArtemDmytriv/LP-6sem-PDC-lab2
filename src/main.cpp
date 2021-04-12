@@ -235,7 +235,7 @@ int main(int argc, char* argv[]) {
 		fout.close();
 		if (isDebugLog) logoutput(std::cout, matrix, count_of_nodes, matrix_map);
 
-		std::cout << "Result=\n" << std::ios::fixed << matrix[id_result];
+		std::cout << "Result=\n" << matrix[id_result];
 	}
 
 	MPI_Type_free(&job_type);
