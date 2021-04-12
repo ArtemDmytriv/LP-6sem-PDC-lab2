@@ -42,20 +42,16 @@ int main(int argc, char* argv[]) {
 	bool isRandGen = false;
 	bool isDebugLog = false;
 	if (proc_rank == 0) {
-		if (argc > 1) {
-			if (argv[1] == "-g") {
-				isDebugLog = true;
-			}
-		}
-		std::cout << "sizeof(" << sizeof(Matrix) << ")\n";
+
 		std::cout << "n = ";
 		std::cin >> n;
-		std::cout << "Generate random matrices '(y)es (n)o:  ";
-
-		std::string ans;
-		std::cin >> ans;
-		std::for_each(ans.begin(), ans.end(), tolower);
-		isRandGen = (ans == "yes" || ans == "y") ? true : false;
+		if (argc == 1) {
+			std::cout << "Generate random matrices '(y)es (n)o:  ";
+			std::string ans;
+			std::cin >> ans;
+			std::for_each(ans.begin(), ans.end(), tolower);
+			isRandGen = (ans == "yes" || ans == "y") ? true : false;
+		}
 	}
 
 	MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);

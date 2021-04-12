@@ -25,21 +25,21 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="btnGenerateMatrix">
        <property name="text">
         <string>Generate rand Matrix</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_3">
+      <widget class="QPushButton" name="btnAllGenerate">
        <property name="text">
         <string>Generate all random</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btnStartAlgo">
        <property name="text">
         <string>Start calculation</string>
        </property>
