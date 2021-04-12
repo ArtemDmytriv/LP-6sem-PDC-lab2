@@ -33,10 +33,29 @@ class SymMatrices:
                 f.write('\n')
         f.close()
 
+    def set_N(self, n):
+        while (self.N != n):
+            if (self.N < n):
+                #print('inc N')
+                for key in self.matrices:
+                    #pprint(self.matrices[key])
+                    self.matrices[key] = self.matrices[key].row_insert(self.N, zeros(1, self.matrices[key].shape[1]))
+                    if (key != "b1" and key != 'c1'):
+                        self.matrices[key] = self.matrices[key].col_insert(self.N, zeros(self.matrices[key].shape[0], 1))
+                    #pprint(self.matrices[key])
+                self.N += 1
+            else:
+                for key in self.matrices:
+                    self.matrices[key].row_del(self.N - 1)
+                    if (key != "b1" and key != 'c1'):
+                        self.matrices[key].col_del(self.N - 1)
+                self.N -= 1
+
 class PyMatrix(QMainWindow):
     def __init__(self):
         super().__init__()
         self.mat = SymMatrices()
+        self.makePopulate = False
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -58,7 +77,6 @@ class PyMatrix(QMainWindow):
         self.ui.matrixList.addItem("matrix A2")
         self.ui.matrixList.addItem("matrix B2")
         self.ui.matrixList.setCurrentItem(self.ui.matrixList.itemAt(0, 0))
-
         self.ui.matrixList.currentItemChanged.connect(lambda: self.onChangedMatrix(self.ui.matrixList.currentRow()))
 
     def initTable(self):
@@ -66,13 +84,24 @@ class PyMatrix(QMainWindow):
         self.ui.matrixTable.setRowCount(self.ui.spinBox.value())
         self.populateTable()
         self.ui.matrixTable.resizeColumnsToContents()
+        self.ui.matrixTable.cellChanged.connect(lambda: self.onUpdatedCell())
 
     def populateTable(self):
+        self.makePopulate = True
         key = self.ui.matrixList.currentItem().text().split()[1]
         for row in range(self.ui.matrixTable.rowCount()):
             for col in range(self.ui.matrixTable.columnCount()):
                 self.ui.matrixTable.setItem(row, col,
                     QTableWidgetItem(str(self.mat.matrices[key][row, col])))
+        self.makePopulate = False
+
+    def onUpdatedCell(self):
+        if (self.makePopulate == False):
+            print('was updated cell')
+            key = self.ui.matrixList.currentItem().text().split()[1]
+            for row in range(self.ui.matrixTable.rowCount()):
+                for col in range(self.ui.matrixTable.columnCount()):
+                    self.mat.matrices[key][row, col] = self.ui.matrixTable.item(row, col).text()
 
     def onChangedMatrix(self, index):
         if (index == 2 or index == 3):
@@ -80,9 +109,7 @@ class PyMatrix(QMainWindow):
         else:
             self.ui.matrixTable.setColumnCount(self.ui.spinBox.value())
         self.ui.matrixTable.setRowCount(self.ui.spinBox.value())
-
-        self.mat.N = self.ui.spinBox.value()
-
+        self.mat.set_N(self.ui.spinBox.value())
         self.populateTable()
         self.ui.matrixTable.resizeColumnsToContents()
 
