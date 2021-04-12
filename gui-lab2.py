@@ -116,7 +116,41 @@ class PyMatrix(QMainWindow):
         print("MPI result=")
         pprint(Matrix(res))
         print("Python recheck result=")
-        pprint(checkResult())
+        recheck = checkResult()
+        pprint(recheck)
+
+        dlg = QDialog(self)
+        dlg.setGeometry(100, 100, 200, 200)
+
+        mpi_res = QTableWidget()
+        mpi_res.setWindowTitle("MPI Result")
+        mpi_res.setRowCount(len(res))
+        mpi_res.setColumnCount(len(res[0]))
+
+        for row in range(mpi_res.rowCount()):
+            for col in range(mpi_res.columnCount()):
+                mpi_res.setItem(row, col, QTableWidgetItem(res[row][col]))
+        mpi_res.resizeColumnsToContents()
+
+        py_res = QTableWidget()
+        py_res.setWindowTitle("Py Result")
+        py_res.setRowCount(recheck.shape[0])
+        py_res.setColumnCount(recheck.shape[1])
+
+        for row in range(py_res.rowCount()):
+            for col in range(py_res.columnCount()):
+                py_res.setItem(row, col, QTableWidgetItem(str(recheck[row, col])))
+
+        py_res.resizeColumnsToContents()
+
+        layout = QGridLayout(dlg)
+        layout.addWidget(QLabel("MPI Result"), 0, 0)
+        layout.addWidget(QLabel("Python Result"), 0, 1)
+        layout.addWidget(mpi_res, 1, 0)
+        layout.addWidget(py_res, 1, 1)
+
+        dlg.setWindowTitle("Results")
+        dlg.exec_()
 
 
 
