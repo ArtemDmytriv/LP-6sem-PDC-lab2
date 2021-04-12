@@ -136,7 +136,10 @@ class PyMatrix(QMainWindow):
         out = out.splitlines()
 
         res = []
+        time_mpi = ""
         for i in range(len(out)):
+            if out[i].find(b"Time") >= 0:
+                time_mpi = out[i].decode("utf-8").split(":")[1]
             if out[i].find(b"Result") >= 0:
                 for k in range(1, self.mat.N + 1):
                     res.append(list(filter(lambda x: x != '', out[i+k].decode("utf-8").split(' '))))
@@ -147,10 +150,9 @@ class PyMatrix(QMainWindow):
         pprint(recheck)
 
         dlg = QDialog(self)
-        dlg.setGeometry(100, 100, 200, 200)
+        dlg.setGeometry(100, 100, 500, 500)
 
         mpi_res = QTableWidget()
-        mpi_res.setWindowTitle("MPI Result")
         mpi_res.setRowCount(len(res))
         mpi_res.setColumnCount(len(res[0]))
 
@@ -160,7 +162,6 @@ class PyMatrix(QMainWindow):
         mpi_res.resizeColumnsToContents()
 
         py_res = QTableWidget()
-        py_res.setWindowTitle("Py Result")
         py_res.setRowCount(recheck.shape[0])
         py_res.setColumnCount(recheck.shape[1])
 
@@ -171,7 +172,7 @@ class PyMatrix(QMainWindow):
         py_res.resizeColumnsToContents()
 
         layout = QGridLayout(dlg)
-        layout.addWidget(QLabel("MPI Result"), 0, 0)
+        layout.addWidget(QLabel("MPI Result " + time_mpi), 0, 0)
         layout.addWidget(QLabel("Python Result"), 0, 1)
         layout.addWidget(mpi_res, 1, 0)
         layout.addWidget(py_res, 1, 1)
