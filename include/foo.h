@@ -27,6 +27,12 @@ struct Job {
     //Job(int id, int *arg, operation op) : id(id),
 };
 
+const std::map<int, std::string> matrix_map {{1, "A"}, {2, "bi"}, {3, "A1"}, {4, "b1"}, {5, "c1"}, {6, "A2"}, {7, "B2"}, {8, "Cij"},
+											 {9, "2b1 + 3c1"}, {10, "B2 - C2"}, {11, "y1"}, {12, "y2"}, {13, "Y3"},
+											 {14, "y1y1'"}, {15, "y2y2'"}, {16, "Y3^2"}, {17, "y1y2'"}, {18, "Y3y2"},
+											 {19, "y1y1'Y3"}, {20, "Y3^2 + y1y2'"}, {21, "y1y2'Y3y2"}, {22, "y1y1'Y3y2y2'"},
+											 {23, "y1y2'Y3y2 + y1"}, {24, "y1y1'Y3y2y2' + Y3^2 + y1y2'"}, {25, "Res"}};
+
 
 MPI_Datatype get_Job_struct_mpi();
 
@@ -37,8 +43,8 @@ Job get_job_from_list_and_erase(std::list<Job> &lst, Matrix *mat, std::list<Job>
 bool send_generate_job(int tag, int row, int col);
 void send_res_generate_job(int tag);
 
-void send_matrix_to_proc(const Matrix &op1, int proc_rank);
-Matrix recv_mat_from_main(int proc_rank, int mat_id);
+void send_matrix_to_proc(int proc_rank, const Matrix *mat, int id, int to_proc_rank);
+Matrix recv_mat_from_proc(int proc_rank, int mat_id);
 
 void do_job(int proc_rank, Job job, Matrix *mat);
 

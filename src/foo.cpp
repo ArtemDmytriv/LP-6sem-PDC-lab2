@@ -21,7 +21,8 @@ MPI_Datatype get_Job_struct_mpi() {
 Job get_job_from_list_and_erase(std::list<Job> &lst, Matrix *mat, std::list<Job>::iterator &to_erase) {
 	Job job {-1, Job::operation::WAIT };
 	for (auto ptr = lst.begin(); ptr != lst.end(); ptr++) {
-		if (ptr->op == Job::operation::GEN_MATRIX || (mat[ptr->arg[0]].get_col() != 0 && mat[ptr->arg[1]].get_col() != 0)) {
+		if (ptr->op == Job::operation::GEN_MATRIX ||
+		(mat[ptr->arg[0]].get_col() != 0 && mat[ptr->arg[1]].get_col() != 0)) {
 			job = *ptr;
 			to_erase = ptr;
 			break;
@@ -48,23 +49,23 @@ Matrix generate_b_vector(int n) {
 	return b;
 }
 
-void send_matrix_to_proc(const Matrix &op1, int proc_rank) {
-	std::pair<int, int> shape1 = op1.get_shape();
-	MPI_Send(&shape1.first, 2, MPI_INT, proc_rank, 0, MPI_COMM_WORLD);
-	MPI_Send(op1.data(), op1.get_col() * op1.get_row(), MPI_DOUBLE, proc_rank, 0, MPI_COMM_WORLD);
+void send_matrix_to_proc(int proc_rank, const Matrix* matrix, int id, int to_proc_rank) {
+	std::pair<int, int> shape1 = matrix[id].get_shape();
+	std::cout << "Proc: " << proc_rank << " -> " << to_proc_rank << " Send matrix [" << matrix_map.at(id) << "]"<<  std::endl;
+	MPI_Send(&shape1.first, 2, MPI_INT, to_proc_rank, id, MPI_COMM_WORLD);
+	MPI_Send(matrix[id].data(), matrix[id].get_col() * matrix[id].get_row(), MPI_DOUBLE, to_proc_rank, id, MPI_COMM_WORLD);
 }
 
-Matrix recv_mat_from_main(int proc_rank, int mat_id) {
+Matrix recv_mat_from_proc(int proc_rank, int mat_id) {
 	Matrix mat;
 	std::pair<int, int> shape;
 	MPI_Status status;
 
-	std::cout << "Proc: " << proc_rank << " - Recive input matrices [" << mat_id << "]" << std::endl;
-	MPI_Recv(&shape.first, 2, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+	MPI_Recv(&shape.first, 2, MPI_INT, MPI_ANY_SOURCE, mat_id, MPI_COMM_WORLD, &status);
 	mat.set_shape(shape);
 	// recv matrix
-	MPI_Recv(mat.data(), shape.first * shape.second, MPI_DOUBLE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-	std::cout << "Proc: " << proc_rank << " - Recv end" << std::endl;
+	MPI_Recv(mat.data(), shape.first * shape.second, MPI_DOUBLE, MPI_ANY_SOURCE, mat_id, MPI_COMM_WORLD, &status);
+	std::cout << "Proc: " << proc_rank << " <- " << status.MPI_SOURCE <<  " Recv end [" << matrix_map.at(mat_id) << "]" << std::endl;
 	return mat;
 }
 
@@ -112,22 +113,18 @@ void do_job(int proc_rank, Job job, Matrix *mat) {
 	case Job::operation::PLUS_WITH_SCALAR: {
 		// std::cout << "Proc: " << proc_rank << " - plus matrices (with scalar) by id: " << job.arg[0] << "+" << job.arg[1] << std::endl;
 		mat[job.id] = mat[job.arg[0]] * job.scalar[0] + mat[job.arg[1]] * job.scalar[1];
-		std::cout << "RESULT << " << mat[job.id];
 		break;
 	}
 	}
-
-	std::cout << "Proc: " << proc_rank << " - Sending result matrix " << mat[job.id].get_row() << "x" << mat[job.id].get_col() << std::endl;
-	auto shape = mat[job.id].get_shape();
-	MPI_Send(&shape.first, 2, MPI_INT, 0, job.id, MPI_COMM_WORLD);
-	MPI_Send(mat[job.id].data(), shape.first * shape.second, MPI_DOUBLE, 0, job.id, MPI_COMM_WORLD);
 }
 
 
 void logoutput(std::ostream &os, Matrix *mat, int n, const std::map<int, std::string> &mat_map) {
 	for (int i = 1; i < n; ++i) {
-		os << mat_map.at(i) << " =\n";
-		os << mat[i];
-		os << "--------------------------------------\n";
+		if (mat[i].get_row() != 0) {
+			os << mat_map.at(i) << " =\n";
+			os << mat[i];
+			os << "--------------------------------------\n";
+		}
 	}
 }

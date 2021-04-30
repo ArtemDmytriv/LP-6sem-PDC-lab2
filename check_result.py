@@ -26,3 +26,6 @@ def checkResult():
 
     res = (y1*(y1.T)*Y3*y2*(y2.T) + Y3**2 + y1*(y2.T))*(y1*(y2.T)*Y3*y2 + y1)
     return res
+
+if __name__ == '__main__':
+    sp.pprint(checkResult())

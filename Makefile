@@ -6,7 +6,7 @@ OBJDIR=obj/
 INCDIR=include/
 
 CXX=mpic++
-CXXFLAGS+=-std=c++17 -g -I$(INCDIR)
+CXXFLAGS+=-std=c++17 -I$(INCDIR)
 
 SOURCES  = $(wildcard $(SRCDIR)*.cpp)
 _OBJECTS = $(patsubst $(SRCDIR)%.cpp, %.o, $(SOURCES))

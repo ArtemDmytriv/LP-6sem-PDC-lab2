@@ -22,7 +22,6 @@ class SymMatrices:
                           ("A2", zeros(self.N, self.N)),
                           ("B2", zeros(self.N, self.N))])
 
-
     def readToFile(self):
         f = open("matrices.txt", 'w')
         f.write(str(self.N) + '\n')
@@ -132,7 +131,7 @@ class PyMatrix(QMainWindow):
     def onClickedStart(self):
         self.mat.readToFile()
         inp = open('matrices.txt', 'r')
-        out = subprocess.check_output(['mpirun', '-n', '4', './lab2', '-f'], stdin=inp)
+        out = subprocess.check_output(['mpirun', '-n', '3', './lab2', '-f'], stdin=inp)
         out = out.splitlines()
 
         res = []
@@ -147,11 +146,12 @@ class PyMatrix(QMainWindow):
             if out[i].find(b"Time taken by one thread program") >= 0:
                 time_one_thread = out[i].decode("utf-8").split(":")[1].split(" ")[1]
 
-        print("MPI result=")
-        pprint(Matrix(res))
-        print("Python recheck result=")
+        print("MPI time: " + time_mpi)
+        print("OneThread time: " + time_one_thread)
+        #pprint(Matrix(res))
+        #print("Python recheck result=")
         recheck = checkResult()
-        pprint(recheck)
+        #pprint(recheck)
 
         dlg = QDialog(self)
         dlg.setGeometry(100, 100, 500, 500)
@@ -176,7 +176,7 @@ class PyMatrix(QMainWindow):
         py_res.resizeColumnsToContents()
 
         layout = QGridLayout(dlg)
-        layout.addWidget(QLabel("MPI Result " + time_mpi + " : " + time_one_thread), 0, 0)
+        layout.addWidget(QLabel("MPI res = " + time_mpi + " us :: 1-thread res = " + time_one_thread + " us"), 0, 0)
         layout.addWidget(QLabel("Python Result"), 0, 1)
         layout.addWidget(mpi_res, 1, 0)
         layout.addWidget(py_res, 1, 1)
