@@ -1,0 +1,8 @@
+Required dependecies
+
+- MPI
+- Python3 (upper then 3.5)
+- Python3-libs: 
+  - pyqt5 
+  - sympy 
+  - numpy
