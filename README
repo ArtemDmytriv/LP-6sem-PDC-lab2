@@ -1,4 +1,4 @@
-Required dependecies
+Required dependencies
 
 - MPI
 - Python3 (upper then 3.5)
@@ -6,3 +6,7 @@ Required dependecies
   - pyqt5 
   - sympy 
   - numpy
+
+Run app:
+
+$> python3 gui-lab2.py
