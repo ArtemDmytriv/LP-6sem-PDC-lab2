@@ -27,6 +27,20 @@ struct Job {
     //Job(int id, int *arg, operation op) : id(id),
 };
 
+const int count_of_nodes = 26;
+
+enum Node{
+    DUMMY,
+    _A, _bi, _A1, _b1, _c1, _A2, _B2, _Cij,
+    _2b1_plus_3c1, _B2_minu_C2,
+    _y1, _y2, _Y3,
+    _y1y1T, _y2y2T, _Y3p2, _y1y2T, _Y3y2,
+    _y1y1TY3, _Y3p2_plus_y1y2T, _y1y2TY3y2,
+    _y1y1TY3y2y2T, _y1y2TY3y2_plus_y1,
+    _y1y1TY3y2y2T_plus_Y3p2_plus_y1y2T,
+    _RES
+};
+
 const std::map<int, std::string> matrix_map {{1, "A"}, {2, "bi"}, {3, "A1"}, {4, "b1"}, {5, "c1"}, {6, "A2"}, {7, "B2"}, {8, "Cij"},
 											 {9, "2b1 + 3c1"}, {10, "B2 - C2"}, {11, "y1"}, {12, "y2"}, {13, "Y3"},
 											 {14, "y1y1'"}, {15, "y2y2'"}, {16, "Y3^2"}, {17, "y1y2'"}, {18, "Y3y2"},
