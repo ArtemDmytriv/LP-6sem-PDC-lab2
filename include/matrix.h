@@ -16,12 +16,14 @@ public:
     explicit Matrix(int n = 0);
     Matrix(int row, int col);
     Matrix(const Matrix &op);
+    Matrix(Matrix &&other);
     ~Matrix();
     void init_matrix(double range_start = 0.0, double range_end = 100.0);
     void init_matrix(const std::vector<std::vector<double>> &vec);
     void init_matrix(std::istream &is);
 
     Matrix& operator= (const Matrix &op);
+    Matrix& operator= (Matrix &&other);
     friend Matrix operator+(const Matrix &op1, const Matrix &op2);
     friend Matrix operator-(const Matrix &op1, const Matrix &op2);
     friend Matrix operator*(const Matrix &op1, const Matrix &op2);

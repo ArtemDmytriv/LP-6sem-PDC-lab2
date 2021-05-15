@@ -45,6 +45,13 @@ Matrix::Matrix(const Matrix &op) : row(op.row), col(op.col) {
     }
 }
 
+Matrix::Matrix(Matrix &&other) : arr(other.arr), row(other.row), col(other.col) {
+    std::cout << "#Debug# Move ctor called\n";
+    other.arr = nullptr;
+    other.row = 0;
+    other.col = 0;
+}
+
 Matrix::~Matrix() {
     if (arr)
         delete [] arr;
@@ -88,6 +95,20 @@ Matrix& Matrix::operator= (const Matrix &op) {
     std::copy(op.arr, op.arr + op.row * op.col, this->arr);
     this->row = op.row;
     this->col = op.col;
+    return *this;
+}
+
+Matrix& Matrix::operator= (Matrix &&other) {
+    std::cout << "#Debug# Move assign called\n";
+    if (this != &other) {
+        delete [] this->arr;
+        this->arr = other.arr;
+        this->row = other.row;
+        this->col = other.col;
+        other.arr = nullptr;
+        other.row = 0;
+        other.col = 0;
+    }
     return *this;
 }
 

@@ -131,7 +131,7 @@ class PyMatrix(QMainWindow):
     def onClickedStart(self):
         self.mat.readToFile()
         inp = open('matrices.txt', 'r')
-        out = subprocess.check_output(['mpirun', '-n', '3', './lab2', '-f'], stdin=inp)
+        out = subprocess.check_output(['nice', '-n', '-20','mpirun', '-n', '3', './lab2', '-f'], stdin=inp)
         out = out.splitlines()
 
         res = []
